@@ -23,7 +23,7 @@ contract FundMe {
         i_owner = msg.sender;
         s_priceFeed = AggregatorV3Interface(priceFeed);
     }
-    
+
     function fund() public payable {
         require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to spend more ETH!");
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
@@ -40,8 +40,7 @@ contract FundMe {
         if (msg.sender != i_owner) revert FundMe__NotOwner();
         _;
     }
-    
-    
+
     function cheaperWithdraw() public onlyOwner {
         uint256 fundersLength = s_funders.length;
         for (uint256 funderIndex = 0; funderIndex < fundersLength; funderIndex++) {
@@ -91,18 +90,17 @@ contract FundMe {
         fund();
     }
 
-    function getAddressToAmountFunded(address fundingAddress) external view returns(uint256) {
+    function getAddressToAmountFunded(address fundingAddress) external view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
 
-    function getFunder(uint256 index) external view returns(address) {
+    function getFunder(uint256 index) external view returns (address) {
         return s_funders[index];
     }
 
-    function getOwner() external view returns(address) {
+    function getOwner() external view returns (address) {
         return i_owner;
     }
-
 }
 
 // Concepts we didn't cover yet (will cover in later sections)

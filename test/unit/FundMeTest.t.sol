@@ -6,9 +6,8 @@ import {Test, console} from "forge-std/Test.sol";
 import {FundMe} from "../../src/FundMe.sol";
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 
-
 // what can we do to work with address outside our system?
-//1. Unit 
+//1. Unit
 //    - Testing a specific part of our code
 //2. Integration
 //  - Testing how our code works with other parts of our code
@@ -51,6 +50,7 @@ contract FundMeTest is Test {
     function testFundIsEnoughEth() public {
         fundMe.fund{value: 6e18}();
     }
+
     modifier funded() {
         vm.prank(USER);
         fundMe.fund{value: SEND_VALUE}();
@@ -58,21 +58,16 @@ contract FundMeTest is Test {
     }
 
     function testFundUpdatesFundedDataStructure() public funded {
-        
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
         assertEq(amountFunded, SEND_VALUE);
     }
 
     function testAddsFundersToArrayOfFunders() public funded {
-        
-
         address funder = fundMe.getFunder(0);
         assertEq(funder, USER);
     }
 
     function testOnlyOwnerCanWithdraw() public funded {
-        
-
         vm.expectRevert();
         fundMe.withdraw();
     }
@@ -80,13 +75,11 @@ contract FundMeTest is Test {
     function testWithdrawAsaSingleFunder() public funded {
         uint256 startingOwnerBalance = fundMe.getOwner().balance;
         uint256 startingFundMeBalance = address(fundMe).balance;
-        
+
         //Act
-        
+
         vm.prank(fundMe.getOwner());
         fundMe.withdraw();
-
-        
 
         //assert
         uint256 endingOwnerBalance = fundMe.getOwner().balance;
@@ -99,7 +92,7 @@ contract FundMeTest is Test {
         console.log("endingOwnerBalance", endingOwnerBalance);
         console.log("endingFundMeBalance", endingFundMeBalance);
     }
-    
+
     function testWithdrawAsaMultipleFunders() public funded {
         uint256 numberOfFunders = 10;
         uint256 startingFunderIndex = 2;
@@ -119,7 +112,6 @@ contract FundMeTest is Test {
         //Assert
         assert(address(fundMe).balance == 0);
         assert(startingFundMeBalance + startingOwnerBalance == endingOwnerBalance);
-
     }
 
     function testWithdrawAsaMultipleFundersCheaper() public funded {
@@ -141,8 +133,5 @@ contract FundMeTest is Test {
         //Assert
         assert(address(fundMe).balance == 0);
         assert(startingFundMeBalance + startingOwnerBalance == endingOwnerBalance);
-
     }
-
-
 }
