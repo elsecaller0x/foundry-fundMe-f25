@@ -5,6 +5,10 @@ pragma solidity ^0.8.18;
 import {Test, console} from "forge-std/Test.sol";
 import {FundMe} from "../../src/FundMe.sol";
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
+import {ZkSyncChainChecker} from "lib/foundry-devops/src/ZkSyncChainChecker.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
 
 // what can we do to work with address outside our system?
 //1. Unit
@@ -15,8 +19,9 @@ import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 // -Testing our code on a simulated environment
 //4. STaging
 // -Testing Our code in a real environment
-contract FundMeTest is Test {
-    FundMe fundMe;
+contract FundMeTest is ZkSyncChainChecker, CodeConstants, StdCheats, Test {
+    FundMe public fundMe;
+    HelperConfig public helperConfig;
     address USER = makeAddr("user");
     uint256 constant SEND_VALUE = 1 ether;
     uint256 constant STARTING_BALANCE = 10 ether;
@@ -24,8 +29,13 @@ contract FundMeTest is Test {
 
     function setUp() external {
         // fundMe = new FundMe(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-        DeployFundMe deployFundMe = new DeployFundMe();
-        fundMe = deployFundMe.run();
+        if (!isZkSyncChain()) {
+            DeployFundMe deployer = new DeployFundMe();
+            (fundMe, helperConfig) = deployer.deployFundMe();
+        } else {
+            MockV3Aggregator mockPriceFeed = new MockV3Aggregator(DECIMALS, INITIAL_PRICE);
+            fundMe = new FundMe(address(mockPriceFeed));
+        }
         vm.deal(USER, STARTING_BALANCE);
     }
 
